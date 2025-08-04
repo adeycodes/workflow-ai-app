@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Builder - WorkflowAI</title>
+    <link rel="stylesheet" href="./assets/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container navbar">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-robot"></i>
+                WorkflowAI
+            </a>
+            <ul class="nav-links">
+                <li><a href="/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/templates.html"><i class="fas fa-th-large"></i> Templates</a></li>
+                <li><a href="/builder.html"><i class="fas fa-project-diagram"></i> Builder</a></li>
+                <li><a href="/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+                <li><a href="#" id="logoutBtn" class="btn btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Builder Content -->
+    <section style="padding: var(--spacing-lg) 0; flex: 1;">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Workflow Builder</h1>
+                    <p class="mb-0" style="color: var(--gray-600);">Design and configure your automation workflow</p>
+                </div>
+                <div class="d-flex gap-md">
+                    <button class="btn btn-outline" id="testBtn">
+                        <i class="fas fa-play"></i> Test Workflow
+                    </button>
+                    <button class="btn btn-primary" id="saveBtn">
+                        <i class="fas fa-save"></i> Save Workflow
+                    </button>
+                </div>
+            </div>
+            
+            <div id="alert" class="alert" style="display: none;"></div>
+            
+            <div class="card mb-lg">
+                <div class="form-group">
+                    <label for="workflowName">Workflow Name</label>
+                    <input type="text" id="workflowName" class="form-control" placeholder="Enter workflow name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="workflowDescription">Description</label>
+                    <textarea id="workflowDescription" class="form-control" placeholder="Describe what this workflow does" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="workflowStatus">Status</label>
+                    <select id="workflowStatus" class="form-control">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Workflow Designer</h3>
+                    <div class="d-flex gap-md">
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fas fa-plus"></i> Add Node
+                        </button>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fas fa-undo"></i> Undo
+                        </button>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fas fa-redo"></i> Redo
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="builder-container">
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: var(--gray-100); color: var(--gray-500);">
+                        <i class="fas fa-project-diagram" style="font-size: 3rem; margin-bottom: var(--spacing-lg);"></i>
+                        <h3>Workflow Builder</h3>
+                        <p class="mb-lg">The visual workflow builder would appear here</p>
+                        <div style="background: white; padding: var(--spacing-lg); border-radius: var(--border-radius); box-shadow: var(--shadow); max-width: 500px; text-align: left;">
+                            <h4><i class="fas fa-lightbulb"></i> Getting Started</h4>
+                            <ul style="text-align: left;">
+                                <li>Click "Add Node" to start building your workflow</li>
+                                <li>Connect nodes to define the automation flow</li>
+                                <li>Configure each node with your specific settings</li>
+                                <li>Test your workflow before activating it</li>
+                            </ul>
+                        </div>
+                        <div class="mt-lg" style="display: flex; gap: var(--spacing-md);">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Trigger Node
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-book"></i> View Documentation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-lg">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Workflow Configuration</h3>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4>n8n Workflow ID</h4>
+                        <p class="mb-0" style="color: var(--gray-600);">This workflow is linked to n8n workflow: <code id="n8nWorkflowId">n8n_placeholder_12345</code></p>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline">
+                            <i class="fas fa-external-link-alt"></i> Open in n8n
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3><i class="fas fa-robot"></i> WorkflowAI</h3>
+                    <p>Automating business tasks for Nigerian SMEs and entrepreneurs since 2023.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Product</h3>
+                    <ul>
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Templates</a></li>
+                        <li><a href="#">Integrations</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 WorkflowAI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script>
+        // Check if user is logged in
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('access_token');
+            window.location.href = '/login.html';
+        });
+        
+        // Save workflow
+        document.getElementById('saveBtn').addEventListener('click', async function() {
+            const name = document.getElementById('workflowName').value;
+            const description = document.getElementById('workflowDescription').value;
+            const isActive = document.getElementById('workflowStatus').value === 'true';
+            
+            if (!name) {
+                showAlert('Please enter a workflow name', 'danger');
+                return;
+            }
+            
+            try {
+                const response = await fetch(CONFIG.API_BASE_URL + '/api/workflows/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        description: description,
+                        n8n_workflow_id: 'n8n_' + Date.now(),
+                        is_active: isActive
+                    })
+                });
+                
+                if (response.ok) {
+                    const workflow = await response.json();
+                    showAlert('Workflow saved successfully!', 'success');
+                    
+                    // Update the n8n workflow ID display
+                    document.getElementById('n8nWorkflowId').textContent = workflow.n8n_workflow_id;
+                } else {
+                    const errorData = await response.json();
+                    showAlert('Failed to save workflow: ' + (errorData.detail || 'Unknown error'), 'danger');
+                }
+            } catch (error) {
+                console.error('Error saving workflow:', error);
+                showAlert('Failed to save workflow. Please try again.', 'danger');
+            }
+        });
+        
+        // Test workflow
+        document.getElementById('testBtn').addEventListener('click', function() {
+            showAlert('Workflow test initiated. In a real implementation, this would execute a test run of your workflow.', 'success');
+        });
+        
+        // Show alert
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}`;
+            alert.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

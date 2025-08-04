@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - WorkflowAI</title>
+    <link rel="stylesheet" href="./assets/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container navbar">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-robot"></i>
+                WorkflowAI
+            </a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="/signup.html" class="btn btn-primary">Sign Up</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Login Form -->
+    <section style="padding: var(--spacing-2xl) 0; flex: 1;">
+        <div class="container" style="max-width: 500px;">
+            <div class="card">
+                <div class="text-center mb-xl">
+                    <div style="width: 80px; height: 80px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white;">
+                        <i class="fas fa-lock" style="font-size: 2rem;"></i>
+                    </div>
+                    <h2>Welcome Back</h2>
+                    <p style="color: var(--gray-600);">Sign in to your WorkflowAI account</p>
+                </div>
+                
+                <div id="alert" class="alert" style="display: none;"></div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="position-relative">
+                            <i class="fas fa-envelope" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+                            <input type="email" id="email" class="form-control" placeholder="you@example.com" style="padding-left: 45px;" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="position-relative">
+                            <i class="fas fa-lock" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+                            <input type="password" id="password" class="form-control" placeholder="••••••••" style="padding-left: 45px;" required>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-lg">
+                        <div class="form-check">
+                            <input type="checkbox" id="remember" class="form-check-input">
+                            <label for="remember" class="form-check-label" style="font-size: var(--font-size-sm);">Remember me</label>
+                        </div>
+                        <a href="#" style="font-size: var(--font-size-sm);">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100" id="loginBtn">
+                        <span id="loginText">Sign In</span>
+                        <span id="loginSpinner" class="spinner" style="display: none;"></span>
+                    </button>
+                </form>
+                
+                <div class="text-center mt-xl">
+                    <p style="color: var(--gray-600);">Don't have an account? <a href="/signup.html">Sign up</a></p>
+                </div>
+                
+                <div class="text-center mt-lg" style="position: relative;">
+                    <div style="height: 1px; background: var(--gray-200); margin: 20px 0;"></div>
+                    <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 0 15px; color: var(--gray-500); font-size: var(--font-size-sm);">
+                        Or continue with
+                    </span>
+                </div>
+                
+                <div class="d-flex gap-md mt-lg">
+                    <button class="btn btn-outline w-100">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <button class="btn btn-outline w-100">
+                        <i class="fab fa-microsoft"></i> Microsoft
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3><i class="fas fa-robot"></i> WorkflowAI</h3>
+                    <p>Automating business tasks for Nigerian SMEs and entrepreneurs since 2023.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Product</h3>
+                    <ul>
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Templates</a></li>
+                        <li><a href="#">Integrations</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 WorkflowAI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const alert = document.getElementById('alert');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginText = document.getElementById('loginText');
+            const loginSpinner = document.getElementById('loginSpinner');
+            
+            // Show loading state
+            loginText.style.display = 'none';
+            loginSpinner.style.display = 'inline-block';
+            loginBtn.disabled = true;
+            
+            try {
+                const response = await fetch(CONFIG.API_BASE_URL + '/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'username': email,
+                        'password': password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('access_token', data.access_token);
+                    window.location.href = '/dashboard.html';
+                } else {
+                    alert.className = 'alert alert-danger';
+                    alert.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${data.detail || 'Login failed'}`;
+                    alert.style.display = 'block';
+                }
+            } catch (error) {
+                alert.className = 'alert alert-danger';
+                alert.innerHTML = '<i class="fas fa-exclamation-triangle"></i> An error occurred. Please try again.';
+                alert.style.display = 'block';
+            } finally {
+                // Restore button state
+                loginText.style.display = 'inline';
+                loginSpinner.style.display = 'none';
+                loginBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

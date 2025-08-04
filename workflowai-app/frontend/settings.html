@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - WorkflowAI</title>
+    <link rel="stylesheet" href="./assets/style.css"
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container navbar">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-robot"></i>
+                WorkflowAI
+            </a>
+            <ul class="nav-links">
+                <li><a href="/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/templates.html"><i class="fas fa-th-large"></i> Templates</a></li>
+                <li><a href="/builder.html"><i class="fas fa-project-diagram"></i> Builder</a></li>
+                <li><a href="/settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+                <li><a href="#" id="logoutBtn" class="btn btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Settings Content -->
+    <section style="padding: var(--spacing-xl) 0; flex: 1;">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Account Settings</h1>
+                    <p class="mb-0" style="color: var(--gray-600);">Manage your account preferences and security</p>
+                </div>
+            </div>
+            
+            <div id="alert" class="alert" style="display: none;"></div>
+            
+            <div class="feature-grid">
+                <!-- Profile Settings -->
+                <div class="feature-card">
+                    <div class="d-flex justify-content-between align-items-center mb-lg">
+                        <h3 class="mb-0"><i class="fas fa-user-circle"></i> Profile Information</h3>
+                        <span class="badge badge-primary">Basic</span>
+                    </div>
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" class="form-control" value="johndoe">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" class="form-control" value="john@example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" class="form-control" placeholder="Enter your full name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="company">Company</label>
+                            <input type="text" id="company" class="form-control" placeholder="Enter your company name">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Profile
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Password Settings -->
+                <div class="feature-card">
+                    <div class="d-flex justify-content-between align-items-center mb-lg">
+                        <h3 class="mb-0"><i class="fas fa-lock"></i> Security</h3>
+                        <span class="badge badge-warning">Important</span>
+                    </div>
+                    <form id="passwordForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" class="form-control" placeholder="Enter current password">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" class="form-control" placeholder="Enter new password">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmNewPassword">Confirm New Password</label>
+                            <input type="password" id="confirmNewPassword" class="form-control" placeholder="Confirm new password">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
+                    </form>
+                    
+                    <div class="mt-xl">
+                        <h4><i class="fas fa-shield-alt"></i> Two-Factor Authentication</h4>
+                        <p style="color: var(--gray-600);">Add an extra layer of security to your account</p>
+                        <button class="btn btn-outline w-100">
+                            <i class="fas fa-plus-circle"></i> Enable 2FA
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Billing Settings -->
+                <div class="feature-card">
+                    <div class="d-flex justify-content-between align-items-center mb-lg">
+                        <h3 class="mb-0"><i class="fas fa-credit-card"></i> Billing & Subscription</h3>
+                        <span class="badge badge-success">Active</span>
+                    </div>
+                    <div class="mb-lg">
+                        <h4>Current Plan: <span class="badge badge-success">Free</span></h4>
+                        <p style="color: var(--gray-600);">2 active workflows • 5 templates • Basic support</p>
+                    </div>
+                    
+                    <div class="mb-lg">
+                        <h4>Usage</h4>
+                        <div class="d-flex justify-content-between mb-sm">
+                            <span>Active Workflows</span>
+                            <span>1/2</span>
+                        </div>
+                        <div style="background: var(--gray-200); border-radius: var(--border-radius-full); height: 8px;">
+                            <div style="background: var(--primary); height: 100%; width: 50%; border-radius: var(--border-radius-full);"></div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary" id="upgradeBtn">
+                        <i class="fas fa-crown"></i> Upgrade to Pro (₦5,000/month)
+                    </button>
+                    
+                    <div class="mt-lg">
+                        <h4>Payment Method</h4>
+                        <div class="d-flex align-items-center p-md" style="border: 1px solid var(--gray-200); border-radius: var(--border-radius);">
+                            <i class="fab fa-cc-visa fa-2x" style="color: #1a1f71;"></i>
+                            <div class="ml-md">
+                                <div>Visa ending in 1234</div>
+                                <div style="color: var(--gray-500); font-size: 0.875rem;">Expires 12/2025</div>
+                            </div>
+                            <button class="btn btn-outline btn-sm ml-auto">Edit</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notification Settings -->
+                <div class="feature-card">
+                    <div class="d-flex justify-content-between align-items-center mb-lg">
+                        <h3 class="mb-0"><i class="fas fa-bell"></i> Notifications</h3>
+                        <span class="badge badge-info">Customize</span>
+                    </div>
+                    <div class="form-group">
+                        <div class="d-flex justify-content-between align-items-center mb-sm">
+                            <label for="emailNotifications" class="mb-0">Email Notifications</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                            </div>
+                        </div>
+                        <p style="color: var(--gray-600); font-size: 0.875rem;">Receive email updates about your workflows</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="d-flex justify-content-between align-items-center mb-sm">
+                            <label for="smsNotifications" class="mb-0">SMS Notifications</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="smsNotifications">
+                            </div>
+                        </div>
+                        <p style="color: var(--gray-600); font-size: 0.875rem;">Receive SMS alerts for critical workflow events</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="d-flex justify-content-between align-items-center mb-sm">
+                            <label for="workflowNotifications" class="mb-0">Workflow Execution Alerts</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="workflowNotifications" checked>
+                            </div>
+                        </div>
+                        <p style="color: var(--gray-600); font-size: 0.875rem;">Get notified when workflows succeed or fail</p>
+                    </div>
+                    
+                    <button class="btn btn-outline">
+                        <i class="fas fa-save"></i> Save Notification Settings
+                    </button>
+                </div>
+                
+                <!-- Danger Zone -->
+                <div class="feature-card">
+                    <div class="d-flex justify-content-between align-items-center mb-lg">
+                        <h3 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                        <span class="badge badge-danger">Caution</span>
+                    </div>
+                    <div class="mb-lg">
+                        <h4>Delete Account</h4>
+                        <p style="color: var(--gray-600);">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                        <button class="btn btn-danger" id="deleteAccountBtn">
+                            <i class="fas fa-trash"></i> Delete Account
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <h4>Export Data</h4>
+                        <p style="color: var(--gray-600);">Download a copy of your account data and workflow configurations.</p>
+                        <button class="btn btn-outline">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3><i class="fas fa-robot"></i> WorkflowAI</h3>
+                    <p>Automating business tasks for Nigerian SMEs and entrepreneurs since 2023.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Product</h3>
+                    <ul>
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Templates</a></li>
+                        <li><a href="#">Integrations</a></li>
+                        <li><a href="#">Pricing</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 WorkflowAI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script>
+        // Check if user is logged in
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+        
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('access_token');
+            window.location.href = '/login.html';
+        });
+        
+        // Profile form submission
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            showAlert('Profile updated successfully!', 'success');
+        });
+        
+        // Password form submission
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+            
+            if (newPassword !== confirmNewPassword) {
+                showAlert('New passwords do not match', 'danger');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showAlert('Password must be at least 8 characters long', 'danger');
+                return;
+            }
+            
+            showAlert('Password changed successfully!', 'success');
+        });
+        
+        // Upgrade button
+        document.getElementById('upgradeBtn').addEventListener('click', function() {
+            showAlert('Redirecting to payment page...', 'success');
+            // In a real app, this would redirect to Paystack payment page
+        });
+        
+        // Delete account button
+        document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                showAlert('Account deleted successfully. Redirecting to homepage...', 'success');
+                // In a real app, this would call the API to delete the account
+                setTimeout(() => {
+                    localStorage.removeItem('access_token');
+                    window.location.href = '/';
+                }, 2000);
+            }
+        });
+        
+        // Show alert
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}`;
+            alert.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

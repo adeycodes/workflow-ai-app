@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - WorkflowAI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="container admin-navbar">
+            <a href="/admin/" class="admin-navbar-brand">
+                <i class="fas fa-crown"></i>
+                WorkflowAI Admin
+            </a>
+            <ul class="admin-nav-links">
+                <li><a href="/admin/"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/admin/templates.html"><i class="fas fa-th-large"></i> Templates</a></li>
+                <li><a href="/dashboard.html"><i class="fas fa-arrow-left"></i> Back to App</a></li>
+                <li><a href="#" id="logoutBtn" class="btn btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Admin Content -->
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <div class="admin-sidebar">
+            <div class="sidebar-header">
+                <h3>Administration</h3>
+            </div>
+            <ul>
+                <li><a href="/admin/" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="/admin/templates.html"><i class="fas fa-th-large"></i> Manage Templates</a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Manage Users</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> System Settings</a></li>
+                <li><a href="#"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                <li><a href="#"><i class="fas fa-bell"></i> Notifications</a></li>
+                <li><a href="#"><i class="fas fa-database"></i> Database</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="admin-content">
+            <div class="admin-content-header">
+                <h1>Admin Dashboard</h1>
+                <div class="d-flex gap-md">
+                    <button class="admin-btn admin-btn-outline">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                    <button class="admin-btn admin-btn-primary">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="admin-stats-grid">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon stat-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="admin-stat-content">
+                        <h3 id="totalUsers">124</h3>
+                        <p>Total Users</p>
+                    </div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon stat-success">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="admin-stat-content">
+                        <h3 id="activeWorkflows">87</h3>
+                        <p>Active Workflows</p>
+                    </div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon stat-warning">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <div class="admin-stat-content">
+                        <h3 id="totalTemplates">23</h3>
+                        <p>Templates</p>
+                    </div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon stat-info">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <div class="admin-stat-content">
+                        <h3 id="executionsToday">1.2K</h3>
+                        <p>Executions Today</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h2>System Overview</h2>
+                    <div class="d-flex gap-md">
+                        <select class="admin-form-control" style="width: 150px;">
+                            <option>Last 7 Days</option>
+                            <option>Last 30 Days</option>
+                            <option>Last 90 Days</option>
+                        </select>
+                        <button class="admin-btn admin-btn-outline admin-btn-sm">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                    </div>
+                </div>
+                <div style="height: 300px; display: flex; align-items: center; justify-content: center; background: #f8fafc; border-radius: var(--admin-border-radius);">
+                    <div class="text-center">
+                        <i class="fas fa-chart-line" style="font-size: 3rem; color: var(--admin-primary);"></i>
+                        <p class="mt-md mb-0" style="color: var(--admin-dark);">System Performance Chart</p>
+                        <p class="mb-0" style="color: #64748b;">(Would show actual charts in production)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h2>Recent Activity</h2>
+                    <button class="admin-btn admin-btn-outline admin-btn-sm">
+                        <i class="fas fa-external-link-alt"></i> View All
+                    </button>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Resource</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 32px; height: 32px; background: var(--admin-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 0.75rem;">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div>John Doe</div>
+                                        <div style="font-size: 0.875rem; color: #64748b;">john@example.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Created Workflow</td>
+                            <td>WhatsApp Order Processor</td>
+                            <td>2 hours ago</td>
+                            <td><span class="badge" style="background-color: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Success</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 32px; height: 32px; background: var(--admin-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 0.75rem;">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div>Jane Smith</div>
+                                        <div style="font-size: 0.875rem; color: #64748b;">jane@example.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Executed Workflow</td>
+                            <td>Email to CRM</td>
+                            <td>4 hours ago</td>
+                            <td><span class="badge" style="background-color: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Success</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 32px; height: 32px; background: var(--admin-warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 0.75rem;">
+                                        <i class="fas fa-user-cog"></i>
+                                    </div>
+                                    <div>
+                                        <div>Admin User</div>
+                                        <div style="font-size: 0.875rem; color: #64748b;">admin@workflowai.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Added Template</td>
+                            <td>New Customer Welcome</td>
+                            <td>1 day ago</td>
+                            <td><span class="badge" style="background-color: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Success</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 32px; height: 32px; background: var(--admin-danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 0.75rem;">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div>Mike Johnson</div>
+                                        <div style="font-size: 0.875rem; color: #64748b;">mike@example.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Deleted Workflow</td>
+                            <td>Old Marketing Campaign</td>
+                            <td>2 days ago</td>
+                            <td><span class="badge" style="background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem;">Deleted</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('access_token');
+            window.location.href = '/login.html';
+        });
+        
+        // Simulate loading data
+        document.addEventListener('DOMContentLoaded', function() {
+            // In a real app, you would fetch actual data from the API
+            console.log('Admin dashboard loaded');
+        });
+    </script>
+</body>
+</html>
