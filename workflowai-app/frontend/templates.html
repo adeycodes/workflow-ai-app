@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Templates - WorkflowAI</title>
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -13,8 +13,14 @@
     <header>
         <div class="container navbar">
             <a href="/" class="navbar-brand">
-                <i class="fas fa-robot"></i>WorkflowAI
+                <i class="fas fa-robot"></i>
+                WorkflowAI
             </a>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
             <ul class="nav-links">
                 <li><a href="/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="/templates.html"><i class="fas fa-th-large"></i> Templates</a></li>
@@ -112,143 +118,6 @@
     </footer>
 
     <script src="config.js"></script>
-    <script>
-        // Check if user is logged in
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-            window.location.href = '/login.html';
-        }
-        
-        // Logout functionality
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.removeItem('access_token');
-            window.location.href = '/login.html';
-        });
-        
-        // Load templates
-        async function loadTemplates() {
-            try {
-                const response = await fetch(CONFIG.API_BASE_URL + '/api/templates/');
-                
-                if (response.ok) {
-                    const templates = await response.json();
-                    const container = document.getElementById('templatesContainer');
-                    container.innerHTML = '';
-                    
-                    if (templates.length === 0) {
-                        container.innerHTML = `
-                            <div class="text-center" style="grid-column: 1 / -1; padding: var(--spacing-xl);">
-                                <i class="fas fa-th-large" style="font-size: 3rem; color: var(--gray-300);"></i>
-                                <h3 class="mt-md">No templates available</h3>
-                                <p class="mb-lg" style="color: var(--gray-600);">Check back later for new templates.</p>
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    templates.forEach(template => {
-                        const templateCard = document.createElement('div');
-                        templateCard.className = 'template-card';
-                        templateCard.innerHTML = `
-                            <span class="template-category">${template.category}</span>
-                            <h3>${template.name}</h3>
-                            <p>${template.description}</p>
-                            <div class="d-flex justify-content-between align-items-center mt-lg">
-                                <button class="btn btn-outline btn-sm" onclick="previewTemplate(${template.id})">
-                                    <i class="fas fa-eye"></i> Preview
-                                </button>
-                                <button class="btn btn-primary btn-sm" onclick="useTemplate(${template.id})">
-                                    <i class="fas fa-plus"></i> Use Template
-                                </button>
-                            </div>
-                        `;
-                        container.appendChild(templateCard);
-                    });
-                } else {
-                    throw new Error('Failed to load templates');
-                }
-            } catch (error) {
-                console.error('Error loading templates:', error);
-                const container = document.getElementById('templatesContainer');
-                container.innerHTML = `
-                    <div class="text-center" style="grid-column: 1 / -1; padding: var(--spacing-xl);">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--danger);"></i>
-                        <p class="mt-md">Failed to load templates. Please try again.</p>
-                        <button class="btn btn-outline" onclick="loadTemplates()">
-                            <i class="fas fa-sync"></i> Retry
-                        </button>
-                    </div>
-                `;
-            }
-        }
-        
-        // Preview template
-        function previewTemplate(templateId) {
-            showAlert('Template preview would open in a modal. In a real implementation, this would show template details.', 'info');
-        }
-        
-        // Use template
-        async function useTemplate(templateId) {
-            try {
-                // First, get the template details
-                const templateResponse = await fetch(`${CONFIG.API_BASE_URL}/api/templates/${templateId}`);
-                
-                if (templateResponse.ok) {
-                    const template = await templateResponse.json();
-                    
-                    // Create a new workflow based on this template
-                    const workflowResponse = await fetch(`${CONFIG.API_BASE_URL}/api/workflows/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({
-                            name: `Copy of ${template.name}`,
-                            description: template.description,
-                            n8n_workflow_id: template.n8n_workflow_id,
-                            is_active: false // Start as inactive
-                        })
-                    });
-                    
-                    if (workflowResponse.ok) {
-                        const workflow = await workflowResponse.json();
-                        showAlert(`Template "${template.name}" added to your workflows!`, 'success');
-                        
-                        // Optionally redirect to the new workflow
-                        setTimeout(() => {
-                            window.location.href = `/builder.html?id=${workflow.id}`;
-                        }, 2000);
-                    } else {
-                        throw new Error('Failed to create workflow from template');
-                    }
-                } else {
-                    throw new Error('Failed to load template');
-                }
-            } catch (error) {
-                console.error('Error using template:', error);
-                showAlert('Failed to use template. Please try again.', 'danger');
-            }
-        }
-        
-        // Show alert
-        function showAlert(message, type) {
-            const alert = document.getElementById('alert');
-            alert.className = `alert alert-${type}`;
-            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'info' ? 'info-circle' : 'exclamation-triangle'}"></i> ${message}`;
-            alert.style.display = 'block';
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 5000);
-        }
-        
-        // Load data when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadTemplates();
-        });
-    </script>
+    <script src="assets/templates.js"></script>
 </body>
 </html>

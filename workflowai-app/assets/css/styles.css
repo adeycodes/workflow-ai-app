@@ -1,3 +1,56 @@
+/* Responsive Navbar Styles */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    width: 30px;
+    height: 25px;
+    justify-content: center;
+    gap: 5px;
+    z-index: 101;
+}
+.hamburger span {
+    display: block;
+    height: 4px;
+    background: var(--primary, #2d6cdf);
+    border-radius: 2px;
+    transition: 0.3s;
+}
+
+@media (max-width: 900px) {
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        flex-direction: column;
+        width: 200px;
+        border-radius: 8px;
+        z-index: 100;
+    }
+    .nav-links.active {
+        display: flex;
+    }
+    .hamburger {
+        display: flex;
+    }
+    .navbar {
+        position: relative;
+    }
+}
+
+/* Hamburger animation */
+.hamburger.open span:nth-child(1) {
+    transform: translateY(9px) rotate(45deg);
+}
+.hamburger.open span:nth-child(2) {
+    opacity: 0;
+}
+.hamburger.open span:nth-child(3) {
+    transform: translateY(-9px) rotate(-45deg);
+}
 /* ===============================
    Font Imports
 ================================ */

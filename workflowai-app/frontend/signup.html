@@ -4,113 +4,121 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign Up - WorkflowAI</title>
-  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
   <!-- Header -->
-  <header class="navbar">
-    <div class="container nav-container">
+  <header>
+    <div class="container navbar">
       <a href="/" class="navbar-brand">
-        <i class="fas fa-robot"></i> WorkflowAI
+        <i class="fas fa-robot"></i>
+        WorkflowAI
       </a>
-      <nav>
-        <ul class="nav-links">
-          <li><a href="/">Home</a></li>
-          <li><a href="#features">Features</a></li>
-          <li><a href="/login.html" class="btn btn-outline">Login</a></li>
-        </ul>
-      </nav>
+      <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="/login.html" class="btn btn-outline">Login</a></li>
+      </ul>
     </div>
   </header>
 
   <!-- Signup Form -->
-  <main class="signup-section">
-    <div class="container form-container">
-      <div class="card signup-card">
-        <div class="form-header">
-          <div class="icon-circle">
-            <i class="fas fa-user-plus"></i>
+  <section style="padding: var(--space-20) 0; flex: 1;">
+    <div class="container" style="max-width: 500px;">
+      <div class="card">
+        <div class="text-center mb-4">
+          <div style="width: 80px; height: 80px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white;">
+            <i class="fas fa-user-plus" style="font-size: 2rem;"></i>
           </div>
           <h2>Create Your Account</h2>
-          <p class="subtitle">Join thousands of Nigerian businesses automating their workflows</p>
+          <p style="color: var(--gray-600);">Join WorkflowAI and automate your business</p>
         </div>
-
-        <div id="alert" class="alert" role="alert" aria-live="polite"></div>
-
-        <form id="signupForm" novalidate>
+        
+        <div id="alert" class="alert" style="display: none;"></div>
+        
+        <form id="signupForm">
           <div class="form-group">
             <label for="fullName">Full Name</label>
-            <div class="input-icon">
-              <i class="fas fa-user"></i>
-              <input type="text" id="fullName" placeholder="John Doe" required />
+            <div class="position-relative">
+              <i class="fas fa-user" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+              <input type="text" id="fullName" class="form-control" placeholder="John Doe" style="padding-left: 45px;" required>
             </div>
           </div>
-
+          
           <div class="form-group">
             <label for="username">Username</label>
-            <div class="input-icon">
-              <i class="fas fa-at"></i>
-              <input type="text" id="username" placeholder="johndoe" required />
+            <div class="position-relative">
+              <i class="fas fa-at" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+              <input type="text" id="username" class="form-control" placeholder="johndoe" style="padding-left: 45px;" required>
             </div>
           </div>
-
+          
           <div class="form-group">
             <label for="email">Email Address</label>
-            <div class="input-icon">
-              <i class="fas fa-envelope"></i>
-              <input type="email" id="email" placeholder="you@example.com" required />
+            <div class="position-relative">
+              <i class="fas fa-envelope" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+              <input type="email" id="email" class="form-control" placeholder="you@example.com" style="padding-left: 45px;" required>
             </div>
           </div>
-
+          
           <div class="form-group">
             <label for="password">Password</label>
-            <div class="input-icon">
-              <i class="fas fa-lock"></i>
-              <input type="password" id="password" placeholder="••••••••" required />
+            <div class="position-relative">
+              <i class="fas fa-lock" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+              <input type="password" id="password" class="form-control" placeholder="••••••••" style="padding-left: 45px;" required>
             </div>
-            <small class="form-hint">
+            <div class="form-hint">
               <i class="fas fa-info-circle"></i> Must be at least 8 characters
-            </small>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="confirmPassword">Confirm Password</label>
-            <div class="input-icon">
-              <i class="fas fa-lock"></i>
-              <input type="password" id="confirmPassword" placeholder="••••••••" required />
+            <div class="position-relative">
+              <i class="fas fa-lock" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+              <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" style="padding-left: 45px;" required>
             </div>
           </div>
-
-          <div class="form-check">
-            <input type="checkbox" id="terms" required />
-            <label for="terms">
+          
+          <div class="form-check mb-4">
+            <input type="checkbox" id="terms" class="form-check-input" required>
+            <label for="terms" class="form-check-label" style="font-size: var(--text-sm);">
               I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
             </label>
           </div>
-
+          
           <button type="submit" class="btn btn-primary w-100" id="signupBtn">
             <span id="signupText">Create Account</span>
-            <span id="signupSpinner" class="spinner" aria-hidden="true"></span>
+            <span id="signupSpinner" class="spinner" style="display: none;"></span>
           </button>
         </form>
-
-        <p class="form-footer">
-          Already have an account? <a href="/login.html">Login</a>
-        </p>
-
-        <div class="divider">
-          <span>Or sign up with</span>
+        
+        <div class="text-center mt-4" style="position: relative;">
+          <div style="height: 1px; background: var(--gray-200); margin: 20px 0;"></div>
+          <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 0 15px; color: var(--gray-500); font-size: var(--font-size-sm);">
+            Or sign up with
+          </span>
         </div>
-
-        <div class="social-buttons">
-          <button class="btn btn-outline w-100">
+        
+        <div class="d-flex gap-md mt-lg">
+          <button class="btn btn-outline w-100" id="googleSignupBtn">
             <i class="fab fa-google"></i> Google
           </button>
-          <button class="btn btn-outline w-100">
+          <button class="btn btn-outline w-100" id="microsoftSignupBtn">
             <i class="fab fa-microsoft"></i> Microsoft
           </button>
+        </div>
+        </form>
+        
+        <div class="text-center mt-4">
+          <p style="color: var(--gray-600);">Already have an account? <a href="/login.html">Sign in</a></p>
         </div>
       </div>
 
@@ -118,7 +126,7 @@
         By signing up, you agree to our Terms of Service and Privacy Policy. We'll occasionally send you account-related emails.
       </p>
     </div>
-  </main>
+  </section>
 
   <!-- Footer -->
   <footer>

@@ -1,22 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional, Dict
 from models import Workflow
 from database import get_db
 from auth import get_current_active_user
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from n8n_service import N8NService
 
 router = APIRouter()
+n8n = N8NService()
 
-class WorkflowCreate(BaseModel):
+class WorkflowBase(BaseModel):
     name: str
     description: str
-    n8n_workflow_id: str
+    workflow_data: Optional[Dict] = Field(default={}, description="n8n workflow definition")
+
+class WorkflowCreate(WorkflowBase):
+    pass
 
 class WorkflowUpdate(BaseModel):
-    name: str = None
-    description: str = None
-    is_active: bool = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    is_active: Optional[bool] = None
+    workflow_data: Optional[Dict] = None
 
 class WorkflowResponse(BaseModel):
     id: int
@@ -30,17 +36,37 @@ class WorkflowResponse(BaseModel):
         orm_mode = True
 
 @router.post("/workflows/", response_model=WorkflowResponse)
-def create_workflow(workflow: WorkflowCreate, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
-    db_workflow = Workflow(
-        name=workflow.name,
-        description=workflow.description,
-        n8n_workflow_id=workflow.n8n_workflow_id,
-        owner_id=current_user.id
-    )
-    db.add(db_workflow)
-    db.commit()
-    db.refresh(db_workflow)
-    return db_workflow
+async def create_workflow(workflow: WorkflowCreate, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
+    try:
+        # Create workflow in n8n
+        n8n_workflow = n8n.create_workflow({
+            "name": workflow.name,
+            "nodes": workflow.workflow_data.get("nodes", []),
+            "connections": workflow.workflow_data.get("connections", {})
+        })
+        
+        # Create workflow in our database
+        db_workflow = Workflow(
+            name=workflow.name,
+            description=workflow.description,
+            n8n_workflow_id=n8n_workflow["id"],
+            owner_id=current_user.id
+        )
+        db.add(db_workflow)
+        db.commit()
+        db.refresh(db_workflow)
+        return db_workflow
+    except Exception as e:
+        # If database operation fails, try to clean up n8n workflow
+        if "n8n_workflow" in locals():
+            try:
+                n8n.delete_workflow(n8n_workflow["id"])
+            except:
+                pass
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create workflow: {str(e)}"
+        )
 
 @router.get("/workflows/", response_model=List[WorkflowResponse])
 def read_workflows(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
@@ -48,6 +74,119 @@ def read_workflows(skip: int = 0, limit: int = 100, db: Session = Depends(get_db
     return workflows
 
 @router.get("/workflows/{workflow_id}", response_model=WorkflowResponse)
+async def read_workflow(workflow_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
+    workflow = db.query(Workflow).filter(Workflow.id == workflow_id, Workflow.owner_id == current_user.id).first()
+    if workflow is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    return workflow
+
+@router.put("/workflows/{workflow_id}", response_model=WorkflowResponse)
+async def update_workflow(
+    workflow_id: int,
+    workflow_update: WorkflowUpdate,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_user)
+):
+    # Get the workflow
+    db_workflow = db.query(Workflow).filter(Workflow.id == workflow_id, Workflow.owner_id == current_user.id).first()
+    if db_workflow is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+
+    try:
+        # Update n8n workflow if workflow_data is provided
+        if workflow_update.workflow_data:
+            n8n.update_workflow(db_workflow.n8n_workflow_id, {
+                "name": workflow_update.name or db_workflow.name,
+                "nodes": workflow_update.workflow_data.get("nodes", []),
+                "connections": workflow_update.workflow_data.get("connections", {})
+            })
+
+        # Update database record
+        if workflow_update.name:
+            db_workflow.name = workflow_update.name
+        if workflow_update.description:
+            db_workflow.description = workflow_update.description
+        if workflow_update.is_active is not None:
+            db_workflow.is_active = workflow_update.is_active
+            if workflow_update.is_active:
+                n8n.activate_workflow(db_workflow.n8n_workflow_id)
+            else:
+                n8n.deactivate_workflow(db_workflow.n8n_workflow_id)
+
+        db.commit()
+        db.refresh(db_workflow)
+        return db_workflow
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update workflow: {str(e)}")
+
+@router.delete("/workflows/{workflow_id}")
+async def delete_workflow(workflow_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
+    workflow = db.query(Workflow).filter(Workflow.id == workflow_id, Workflow.owner_id == current_user.id).first()
+    if workflow is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+
+    try:
+        # Delete from n8n first
+        n8n.delete_workflow(workflow.n8n_workflow_id)
+        # Then delete from our database
+        db.delete(workflow)
+        db.commit()
+        return {"message": "Workflow deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete workflow: {str(e)}")
+
+@router.post("/workflows/{workflow_id}/execute")
+async def execute_workflow(
+    workflow_id: int,
+    execution_data: Dict = None,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_user)
+):
+    workflow = db.query(Workflow).filter(Workflow.id == workflow_id, Workflow.owner_id == current_user.id).first()
+    if workflow is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+
+    try:
+        # Execute workflow in n8n
+        execution = n8n.execute_workflow(workflow.n8n_workflow_id, execution_data)
+        
+        # Log the execution
+        log = ExecutionLog(
+            workflow_id=workflow.id,
+            user_id=current_user.id,
+            status="started",
+            details=str(execution)
+        )
+        db.add(log)
+        db.commit()
+        
+        return {
+            "message": "Workflow execution started",
+            "execution_id": execution.get("id"),
+            "log_id": log.id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to execute workflow: {str(e)}")
+
+@router.get("/workflows/{workflow_id}/executions")
+async def get_workflow_executions(
+    workflow_id: int,
+    limit: int = 20,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_user)
+):
+    workflow = db.query(Workflow).filter(Workflow.id == workflow_id, Workflow.owner_id == current_user.id).first()
+    if workflow is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+
+    try:
+        # Get executions from n8n
+        executions = n8n.get_workflow_executions(workflow.n8n_workflow_id, limit)
+        return executions
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get workflow executions: {str(e)}")
 def read_workflow(workflow_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
     workflow = db.query(Workflow).filter(Workflow.id == workflow_id, Workflow.owner_id == current_user.id).first()
     if workflow is None:

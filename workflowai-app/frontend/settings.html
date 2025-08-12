@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - WorkflowAI</title>
-    <link rel="stylesheet" href="../assets/css/styles.css"
+    <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -16,6 +16,11 @@
                 <i class="fas fa-robot"></i>
                 WorkflowAI
             </a>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
             <ul class="nav-links">
                 <li><a href="/dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="/templates.html"><i class="fas fa-th-large"></i> Templates</a></li>
@@ -257,75 +262,24 @@
     </footer>
 
     <script src="config.js"></script>
-    <script>
-        // Check if user is logged in
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-            window.location.href = '/login.html';
+    <script src="assets/settings.js"></script>
         }
         
-        // Logout functionality
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.removeItem('access_token');
-            window.location.href = '/login.html';
-        });
-        
-        // Profile form submission
-        document.getElementById('profileForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showAlert('Profile updated successfully!', 'success');
-        });
-        
-        // Password form submission
-        document.getElementById('passwordForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-            
-            if (newPassword !== confirmNewPassword) {
-                showAlert('New passwords do not match', 'danger');
-                return;
-            }
-            
-            if (newPassword.length < 8) {
-                showAlert('Password must be at least 8 characters long', 'danger');
-                return;
-            }
-            
-            showAlert('Password changed successfully!', 'success');
-        });
-        
-        // Upgrade button
-        document.getElementById('upgradeBtn').addEventListener('click', function() {
-            showAlert('Redirecting to payment page...', 'success');
-            // In a real app, this would redirect to Paystack payment page
-        });
-        
-        // Delete account button
-        document.getElementById('deleteAccountBtn').addEventListener('click', function() {
-            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                showAlert('Account deleted successfully. Redirecting to homepage...', 'success');
-                // In a real app, this would call the API to delete the account
-                setTimeout(() => {
-                    localStorage.removeItem('access_token');
-                    window.location.href = '/';
-                }, 2000);
-            }
-        });
-        
-        // Show alert
-        function showAlert(message, type) {
-            const alert = document.getElementById('alert');
-            alert.className = `alert alert-${type}`;
-            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}`;
-            alert.style.display = 'block';
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 5000);
+        // Hamburger menu toggle
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+        if (hamburger && navLinks) {
+            hamburger.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                hamburger.classList.toggle('open');
+            });
+            // Close nav when a link is clicked
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                    hamburger.classList.remove('open');
+                });
+            });
         }
     </script>
 </body>

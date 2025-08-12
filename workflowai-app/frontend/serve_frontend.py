@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                    #!/usr/bin/env python3
 """
 Simple HTTP server to serve frontend files
 """
@@ -9,7 +9,7 @@ import os
 PORT = 8080
 
 # Change to frontend directory
-os.chdir('/workspaces/workflow-ai-app/workflowai-app/frontend')
+os.chdir('/home/emmy/Desktop/workflow/workflow-ai-app/workflowai-app/frontend')
 
 Handler = http.server.SimpleHTTPRequestHandler
 

@@ -1,12 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Request
-from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
+import os
 import secrets
 import hashlib
-
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.middleware.cors import CORSMiddleware
+import requests
 from sqlalchemy.orm import Session
 from typing import List
 import uvicorn
@@ -19,6 +19,10 @@ from auth import (
     get_current_active_user,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
+
+# Utility function to get user by email
+def get_user(db: Session, email: str):
+    return db.query(User).filter(User.email == email).first()
 from datetime import timedelta
 from pydantic import BaseModel
 from workflows import router as workflows_router
@@ -29,6 +33,86 @@ from logs import router as logs_router
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="WorkflowAI API", description="Business automation tool for Nigerian SMEs")
+
+# API routes and OAuth routes go first
+@app.get("/auth/google/login")
+async def google_login():
+    """Start the Google OAuth flow"""
+    # Configure OAuth 2.0 params
+    from config import GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI
+    
+    google_auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
+    params = {
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "state": secrets.token_urlsafe(32)
+    }
+    
+    # Build authorization URL
+    from urllib.parse import urlencode
+    authorization_url = f"{google_auth_url}?{urlencode(params)}"
+    return RedirectResponse(authorization_url)
+
+@app.get("/auth/google/callback")
+async def google_callback(request: Request, db: Session = Depends(get_db)):
+    """Handle Google OAuth callback"""
+    # Get the authorization code
+    code = request.query_params.get('code')
+    if not code:
+        raise HTTPException(status_code=400, detail="Missing authorization code")
+    
+    # Exchange code for tokens
+    from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
+    token_url = "https://oauth2.googleapis.com/token"
+    token_data = {
+        "code": code,
+        "client_id": GOOGLE_CLIENT_ID,
+        "client_secret": GOOGLE_CLIENT_SECRET,
+        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "grant_type": "authorization_code"
+    }
+    
+    token_response = requests.post(token_url, data=token_data)
+    if not token_response.ok:
+        print('Google token error:', token_response.text)
+        raise HTTPException(status_code=400, detail="Failed to get access token")
+    
+    token_info = token_response.json()
+    access_token = token_info.get('access_token')
+    
+    if not access_token:
+        raise HTTPException(status_code=400, detail="Failed to obtain access token")
+    
+    # Get user info from Google
+    user_info_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    user_info_response = requests.get(user_info_url, params={'access_token': access_token})
+    user_info_response.raise_for_status()
+    user_info = user_info_response.json()
+    
+    # Get or create user
+    db_user = get_user(db, user_info['email'])
+    if not db_user:
+        db_user = User(
+            email=user_info['email'],
+            username=user_info['email'].split('@')[0],
+            is_active=True,
+            is_admin=False
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+    
+    # Create JWT token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    token = create_access_token(
+        data={"sub": db_user.email}, expires_delta=access_token_expires
+    )
+    
+    # Redirect to dashboard with token
+    return RedirectResponse(f"/dashboard.html?access_token={token}")
 
 # CORS middleware
 app.add_middleware(
@@ -68,10 +152,7 @@ class UserResponse(BaseModel):
     class Config:
         orm_mode = True
 
-# Root endpoint - make sure this is at the top level
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to WorkflowAI API"}
+
 
 @app.get("/health")
 def health_check():
@@ -116,10 +197,8 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
-# Add these constants (you'll need to get these from Google Cloud Console)
-GOOGLE_CLIENT_ID = "your-google-client-id.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "your-google-client-secret"
-GOOGLE_REDIRECT_URI = "https://fantastic-halibut-v9xx69w6vwqfxv7x-8000.app.github.dev/auth/google/callback"
+
+from config import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI
 
 @app.get("/auth/google/login")
 async def google_login():
@@ -144,29 +223,61 @@ async def google_login():
 @app.get("/auth/google/callback")
 async def google_callback(request: Request, db: Session = Depends(get_db)):
     """Handle Google OAuth callback"""
-    code = request.query_params.get("code")
-    state = request.query_params.get("state")
-    
+    # Get the authorization code from the query parameters
+    code = request.query_params.get('code')
     if not code:
         raise HTTPException(status_code=400, detail="Missing authorization code")
     
-    # Exchange code for token
+    # Exchange the authorization code for an access token
     token_url = "https://oauth2.googleapis.com/token"
     token_data = {
+        "code": code,
         "client_id": GOOGLE_CLIENT_ID,
         "client_secret": GOOGLE_CLIENT_SECRET,
         "redirect_uri": GOOGLE_REDIRECT_URI,
-        "grant_type": "authorization_code",
-        "code": code
+        "grant_type": "authorization_code"
     }
     
-    # In a real implementation, you'd make the actual request to Google
-    # For now, let's create a simplified version
+    # Make the request to Google to exchange the code for an access token
+    token_response = requests.post(token_url, data=token_data)
+    if not token_response.ok:
+        print('Google token error:', token_response.text)
+    token_response.raise_for_status()
+    token_info = token_response.json()
+    access_token = token_info.get('access_token')
     
-    # Get user info from Google (simplified)
-    # In reality, you'd validate the token and get user info
+    if not access_token:
+        raise HTTPException(status_code=400, detail="Failed to obtain access token")
     
-    # Create or get user
-    # This is a simplified example - you'd need to implement the actual Google token validation
+    # Get user info from Google using the access token
+    user_info_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    user_info_response = requests.get(user_info_url, params={'access_token': access_token})
+    user_info_response.raise_for_status()
+    user_info = user_info_response.json()
     
-    return {"message": "Google authentication would be implemented here"}
+    # Check if user exists, if not create them
+    db_user = get_user(db, user_info['email'])
+    if not db_user:
+        db_user = User(
+            email=user_info['email'],
+            username=user_info['email'].split('@')[0],
+            is_active=True,
+            is_admin=False
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+    
+    # Create access token for the user
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    token = create_access_token(
+        data={"sub": db_user.email}, expires_delta=access_token_expires
+    )
+    
+    # Redirect to dashboard with the token
+    redirect_url = f"/dashboard.html?access_token={token}"
+    return RedirectResponse(redirect_url)
+
+# Mount frontend static files last, after all API routes are registered
+frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../frontend'))
+app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
