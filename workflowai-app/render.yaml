@@ -2,13 +2,12 @@ services:
   - type: web
     name: workflow-ai-backend
     env: python
-    rootDirectory: workflow-ai-app
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn backend.main:app --worker-class uvicorn.workers.UvicornWorker --chdir workflow-ai-app
+    startCommand: gunicorn backend.main:app --worker-class uvicorn.workers.UvicornWorker
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
       - key: PORT
         value: 10000
       - key: GUNICORN_CMD_ARGS
-        value: --workers=4 --worker-class=uvicorn.workers.UvicornWorker --timeout=120 --chdir=workflow-ai-app
+        value: --workers=4 --worker-class=uvicorn.workers.UvicornWorker --timeout=120
