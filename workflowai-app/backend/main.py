@@ -186,16 +186,13 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         print(f"Error in callback: {str(e)}")  # Debug print
         raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")
 
+# Import CORS settings from config
+from config import ALLOWED_ORIGINS
+
 # CORS middleware with specific origins and headers
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost"
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=[
@@ -204,6 +201,7 @@ app.add_middleware(
         "Accept",
         "Origin",
         "X-Requested-With",
+        "X-CSRF-Token",
         "X-Auth-Token",
         "Access-Control-Allow-Credentials"
     ],

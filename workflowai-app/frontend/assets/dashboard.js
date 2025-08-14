@@ -1,6 +1,26 @@
-// Configuration (replace with your actual API base URL)
-const CONFIG = {
-    API_BASE_URL: 'http://your-api-base-url' // e.g., 'http://localhost:8000'
+// Import configuration
+import CONFIG from '../config.js';
+
+// Add credentials to all fetch requests
+const fetchWithAuth = async (url, options = {}) => {
+    const defaultOptions = {
+        credentials: 'include',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+        },
+        ...options
+    };
+    
+    // Add Authorization header if token exists
+    const token = getAuthToken();
+    if (token) {
+        defaultOptions.headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    return fetch(url, defaultOptions);
 };
 
 // Check if user is authenticated via cookie
@@ -48,13 +68,8 @@ async function checkServerAuth() {
     if (urlParams.has('code')) {
         console.log('Detected OAuth callback with code parameter');
         // Exchange code for token
-        const response = await fetch(`${CONFIG.API_BASE_URL}/auth/google/callback`, {
+        const response = await fetchWithAuth(`${CONFIG.API_BASE_URL}/auth/google/callback`, {
             method: 'POST',
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({ code: urlParams.get('code') })
         });
 
@@ -70,16 +85,8 @@ async function checkServerAuth() {
     try {
         console.log('\n=== Checking Authentication ===');
         console.log('Making request to:', `${CONFIG.API_BASE_URL}/api/users/me`);
-
-        const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/me`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            }
+        const response = await fetchWithAuth(`${CONFIG.API_BASE_URL}/api/users/me`, {
+            method: 'GET'
         });
 
         console.log('\n=== Auth Response ===');
