@@ -139,7 +139,19 @@
         </div>
     </footer>
 
+    <!-- Load config first -->
     <script src="config.js"></script>
+    <!-- Then load login functionality -->
     <script src="assets/login.js"></script>
+    <!-- Add debug script -->
+    <script>
+        // Debug: Verify CONFIG is loaded
+        window.addEventListener('load', function() {
+            console.log('Page loaded. CONFIG available:', !!window.CONFIG);
+            if (window.CONFIG) {
+                console.log('CONFIG.API_BASE_URL:', window.CONFIG.API_BASE_URL);
+            }
+        });
+    </script>
 </body>
 </html>
