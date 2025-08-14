@@ -3,10 +3,28 @@ const urlParams = new URLSearchParams(window.location.search);
 const workflowId = urlParams.get('id');
 
 // Check if user is logged in
-const token = localStorage.getItem('access_token');
-if (!token) {
-    window.location.href = '/login.html';
+async function checkAuth() {
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/users/me`, {
+            method: 'GET',
+            credentials: 'include',  // This is important for sending cookies
+        });
+        
+        if (!response.ok) {
+            throw new Error('Not authenticated');
+        }
+        
+        // If we get here, we're authenticated
+        return true;
+    } catch (error) {
+        console.error('Authentication check failed:', error);
+        window.location.href = '/login.html';
+        return false;
+    }
 }
+
+// Run authentication check
+checkAuth();
 
 // Initialize the builder when page loads
 document.addEventListener('DOMContentLoaded', async function() {
@@ -64,8 +82,13 @@ function setupEventListeners() {
     // Integration card interactions
     document.querySelectorAll('.integration-card').forEach(card => {
         card.addEventListener('click', function() {
-            const integrationName = this.querySelector('h4').textContent;
-            showAlert(`Integration with ${integrationName} configured successfully! You can now use this service in your workflows.`, 'success');
+            const heading = this.querySelector('h4');
+            if (heading) {
+                const integrationName = heading.textContent || 'this service';
+                showAlert(`Integration with ${integrationName} configured successfully! You can now use this service in your workflows.`, 'success');
+            } else {
+                showAlert('Integration configured successfully! You can now use this service in your workflows.', 'success');
+            }
         });
     });
     
@@ -87,7 +110,25 @@ function setupEventListeners() {
     });
     
     // Save workflow button
-    document.getElementById('saveBtn')?.addEventListener('click', saveWorkflow);
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveWorkflow);
+        
+        // Add n8n Editor button next to Save button
+        const n8nBtn = document.createElement('button');
+        n8nBtn.id = 'n8nEditorBtn';
+        n8nBtn.className = 'btn btn-outline-primary';
+        n8nBtn.innerHTML = '<i class="fas fa-project-diagram"></i> Open in n8n Editor';
+        n8nBtn.style.marginLeft = '10px';
+        n8nBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const workflowName = document.getElementById('workflowName')?.value || 'Untitled Workflow';
+            const workflowId = urlParams.get('id') || 'new';
+            openN8NEditor(workflowId, workflowName);
+        });
+        
+        saveBtn.parentNode.insertBefore(n8nBtn, saveBtn.nextSibling);
+    }
     
     // Test workflow button
     document.getElementById('testBtn')?.addEventListener('click', testWorkflow);
@@ -95,7 +136,6 @@ function setupEventListeners() {
     // Logout button
     document.getElementById('logoutBtn').addEventListener('click', function(e) {
         e.preventDefault();
-        localStorage.removeItem('access_token');
         window.location.href = '/login.html';
     });
 }
@@ -128,7 +168,6 @@ async function loadWorkflow(id) {
             
         } else if (response.status === 401) {
             // Token expired or invalid
-            localStorage.removeItem('access_token');
             window.location.href = '/login.html';
         } else {
             throw new Error('Failed to load workflow');
@@ -166,9 +205,9 @@ async function saveWorkflow() {
             response = await fetch(`${CONFIG.API_BASE_URL}/api/workflows/${workflowId}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     name: name,
                     description: description,
@@ -184,9 +223,9 @@ async function saveWorkflow() {
             response = await fetch(`${CONFIG.API_BASE_URL}/api/workflows/`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     name: name,
                     description: description,
@@ -220,7 +259,6 @@ async function saveWorkflow() {
             }
         } else if (response.status === 401) {
             // Token expired or invalid
-            localStorage.removeItem('access_token');
             window.location.href = '/login.html';
         } else {
             throw new Error('Failed to save workflow');
@@ -313,9 +351,7 @@ function showAlert(message, type) {
 async function loadLogs() {
     try {
         const response = await fetch(`${CONFIG.API_BASE_URL}/api/logs/`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            credentials: 'include'  // This will include cookies with the request
         });
         
         if (response.ok) {
@@ -323,7 +359,6 @@ async function loadLogs() {
             renderLogs(logs);
         } else if (response.status === 401) {
             // Token expired or invalid
-            localStorage.removeItem('access_token');
             window.location.href = '/login.html';
         } else {
             throw new Error('Failed to load logs');

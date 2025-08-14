@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict
-from models import Workflow
+from models import Workflow, ExecutionLog
 from database import get_db
 from auth import get_current_active_user
 from pydantic import BaseModel, Field
 from n8n_service import N8NService
+from datetime import datetime
 
 router = APIRouter()
 n8n = N8NService()
@@ -32,6 +33,21 @@ class WorkflowResponse(BaseModel):
     is_active: bool
     owner_id: int
     
+    class Config:
+        orm_mode = True
+
+class ExecutionLogCreate(BaseModel):
+    status: str
+    details: Optional[str] = None
+
+class ExecutionLogResponse(BaseModel):
+    id: int
+    workflow_id: int
+    user_id: int
+    status: str
+    execution_time: datetime
+    details: Optional[str] = None
+
     class Config:
         orm_mode = True
 
@@ -170,7 +186,7 @@ async def execute_workflow(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to execute workflow: {str(e)}")
 
-@router.get("/workflows/{workflow_id}/executions")
+@router.get("/workflows/{workflow_id}/executions", response_model=List[ExecutionLogResponse])
 async def get_workflow_executions(
     workflow_id: int,
     limit: int = 20,
@@ -182,11 +198,96 @@ async def get_workflow_executions(
         raise HTTPException(status_code=404, detail="Workflow not found")
 
     try:
-        # Get executions from n8n
-        executions = n8n.get_workflow_executions(workflow.n8n_workflow_id, limit)
-        return executions
+        # Get executions from both n8n and our database
+        n8n_executions = n8n.get_workflow_executions(workflow.n8n_workflow_id, limit)
+        
+        # Get execution logs from our database
+        db_logs = db.query(ExecutionLog).filter(
+            ExecutionLog.workflow_id == workflow_id,
+            ExecutionLog.user_id == current_user.id
+        ).order_by(ExecutionLog.execution_time.desc()).limit(limit).all()
+        
+        # Update execution logs with n8n status if available
+        for log in db_logs:
+            for n8n_exec in n8n_executions:
+                if str(n8n_exec.get("id")) in log.details:
+                    log.status = n8n_exec.get("status", log.status)
+                    log.details = str(n8n_exec)
+                    db.add(log)
+        
+        db.commit()
+        return db_logs
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get workflow executions: {str(e)}")
+
+@router.get("/workflows/{workflow_id}/executions/{execution_id}", response_model=ExecutionLogResponse)
+async def get_execution_details(
+    workflow_id: int,
+    execution_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_user)
+):
+    # Check if workflow exists and belongs to user
+    workflow = db.query(Workflow).filter(Workflow.id == workflow_id, Workflow.owner_id == current_user.id).first()
+    if workflow is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    # Get execution log
+    execution = db.query(ExecutionLog).filter(
+        ExecutionLog.id == execution_id,
+        ExecutionLog.workflow_id == workflow_id,
+        ExecutionLog.user_id == current_user.id
+    ).first()
+    
+    if execution is None:
+        raise HTTPException(status_code=404, detail="Execution log not found")
+    
+    try:
+        # Try to get updated status from n8n
+        n8n_execution = n8n.get_execution_data(execution.details.get("id"))
+        if n8n_execution:
+            execution.status = n8n_execution.get("status", execution.status)
+            execution.details = str(n8n_execution)
+            db.add(execution)
+            db.commit()
+    except:
+        pass  # If n8n data can't be fetched, return existing log data
+    
+    return execution
+
+@router.post("/workflows/{workflow_id}/executions/{execution_id}", response_model=ExecutionLogResponse)
+async def update_execution_status(
+    workflow_id: int,
+    execution_id: int,
+    log_update: ExecutionLogCreate,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_active_user)
+):
+    # Check if workflow exists and belongs to user
+    workflow = db.query(Workflow).filter(Workflow.id == workflow_id, Workflow.owner_id == current_user.id).first()
+    if workflow is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    
+    # Get execution log
+    execution = db.query(ExecutionLog).filter(
+        ExecutionLog.id == execution_id,
+        ExecutionLog.workflow_id == workflow_id,
+        ExecutionLog.user_id == current_user.id
+    ).first()
+    
+    if execution is None:
+        raise HTTPException(status_code=404, detail="Execution log not found")
+    
+    # Update the execution log
+    execution.status = log_update.status
+    if log_update.details:
+        execution.details = log_update.details
+    
+    db.add(execution)
+    db.commit()
+    db.refresh(execution)
+    
+    return execution
 def read_workflow(workflow_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):
     workflow = db.query(Workflow).filter(Workflow.id == workflow_id, Workflow.owner_id == current_user.id).first()
     if workflow is None:

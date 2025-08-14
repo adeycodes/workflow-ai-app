@@ -1,10 +1,7 @@
 // Function to load execution logs from backend
 async function loadLogs() {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-        window.location.href = '/login.html';
-        return;
-    }
+    // Authentication is now handled via cookies
+    // No need to check localStorage for token
     
     const container = document.getElementById('logsContainer');
     if (!container) return; // Container doesn't exist on this page
@@ -21,7 +18,6 @@ async function loadLogs() {
             renderLogs(logs);
         } else if (response.status === 401) {
             // Token expired or invalid
-            localStorage.removeItem('access_token');
             window.location.href = '/login.html';
         } else {
             throw new Error('Failed to load logs');

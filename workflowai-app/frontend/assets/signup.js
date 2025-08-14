@@ -51,18 +51,10 @@ document.getElementById('signupForm').addEventListener('submit', async function(
         const data = await response.json();
 
         if (response.ok) {
-            // If backend returns a token, store and redirect
-            if (data.access_token) {
-                localStorage.setItem('access_token', data.access_token);
-                window.location.href = '/dashboard.html';
-                return;
-            }
-            alert.className = 'alert alert-success';
-            alert.innerHTML = '<i class="fas fa-check-circle"></i> Account created successfully! Redirecting to login...';
-            alert.style.display = 'block';
-            setTimeout(() => {
-                window.location.href = '/login.html';
-            }, 2000);
+            // Backend now sets HTTP-only cookie automatically
+            // Redirect to dashboard
+            window.location.href = '/dashboard.html';
+            return;
         } else {
             alert.className = 'alert alert-danger';
             alert.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${data.detail || 'Signup failed'}`;
@@ -89,7 +81,7 @@ document.getElementById('googleSignupBtn').addEventListener('click', function() 
 document.addEventListener('DOMContentLoaded', function() {
     const params = new URLSearchParams(window.location.search);
     if (params.has('access_token')) {
-        localStorage.setItem('access_token', params.get('access_token'));
+        // Token is now handled via cookies, no need to store in localStorage
         window.location.href = '/dashboard.html';
     }
 });

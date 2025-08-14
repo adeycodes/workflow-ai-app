@@ -1,21 +1,25 @@
 // Load templates when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-        window.location.href = '/login.html';
-    }
-    
+    // Authentication is now handled via cookies
+    // No need to check localStorage for token
     loadTemplates();
 });
 
 // Load templates from backend
 async function loadTemplates() {
-    const token = localStorage.getItem('access_token');
     const container = document.getElementById('templatesContainer');
     const alert = document.getElementById('alert');
     
+    // If we're not on a page with templates container, just return
+    if (!container) {
+        console.log('No templates container found on this page');
+        return;
+    }
+    
     try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/api/templates/`);
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/templates/`, {
+            credentials: 'include'  // Include cookies for authentication
+        });
         
         if (response.ok) {
             const templates = await response.json();
@@ -25,15 +29,17 @@ async function loadTemplates() {
         }
     } catch (error) {
         console.error('Error loading templates:', error);
-        container.innerHTML = `
-            <div class="text-center" style="grid-column: 1 / -1; padding: var(--spacing-xl);">
-                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--danger);"></i>
-                <p class="mt-md">Failed to load templates. Please try again.</p>
-                <button class="btn btn-outline" onclick="loadTemplates()">
-                    <i class="fas fa-sync"></i> Retry
-                </button>
-            </div>
-        `;
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center" style="grid-column: 1 / -1; padding: var(--spacing-xl);">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--danger);"></i>
+                    <p class="mt-md">Failed to load templates. Please try again.</p>
+                    <button class="btn btn-outline" onclick="loadTemplates()">
+                        <i class="fas fa-sync"></i> Retry
+                    </button>
+                </div>
+            `;
+        }
     }
 }
 
@@ -41,7 +47,14 @@ async function loadTemplates() {
 function renderTemplates(templates) {
     const container = document.getElementById('templatesContainer');
     
-    if (templates.length === 0) {
+    // If container doesn't exist, log an error and return
+    if (!container) {
+        console.error('Templates container not found');
+        return;
+    }
+    
+    // Handle empty templates array
+    if (!templates || templates.length === 0) {
         container.innerHTML = `
             <div class="text-center" style="grid-column: 1 / -1; padding: var(--spacing-xl);">
                 <i class="fas fa-th-large" style="font-size: 2rem; color: var(--gray-400);"></i>
@@ -90,7 +103,6 @@ function previewTemplate(templateId) {
 
 // Use template - create a new workflow based on this template
 async function useTemplate(templateId) {
-    const token = localStorage.getItem('access_token');
     const alert = document.getElementById('alert');
     
     try {
@@ -103,12 +115,12 @@ async function useTemplate(templateId) {
             // Create a new workflow based on this template
             const workflowResponse = await fetch(`${CONFIG.API_BASE_URL}/api/workflows/`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    name: `Copy of ${template.name}`,
+                    name: `My ${template.name} Workflow`,
                     description: template.description,
                     n8n_workflow_id: template.n8n_workflow_id
                 })
@@ -124,7 +136,8 @@ async function useTemplate(templateId) {
                 }, 2000);
             } else if (workflowResponse.status === 401) {
                 // Token expired or invalid
-                localStorage.removeItem('access_token');
+                // Remove access token from cookies
+                document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
                 window.location.href = '/login.html';
             } else {
                 throw new Error('Failed to create workflow from template');
@@ -158,6 +171,7 @@ function showAlert(message, type) {
 // Logout functionality
 document.getElementById('logoutBtn').addEventListener('click', function(e) {
     e.preventDefault();
-    localStorage.removeItem('access_token');
+    // Remove access token from cookies
+    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     window.location.href = '/login.html';
 });

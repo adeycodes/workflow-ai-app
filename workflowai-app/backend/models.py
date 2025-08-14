@@ -13,6 +13,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    token = Column(String, nullable=True)  # Field to store JWT token
     
     workflows = relationship("Workflow", back_populates="owner")
     logs = relationship("ExecutionLog", back_populates="user")

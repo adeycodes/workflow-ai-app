@@ -1,4 +1,5 @@
 # workflow-ai-app
+
 # WorkflowAI - Business Automation Tool
 
 WorkflowAI is a full-stack workflow automation web application designed for Nigerian SMEs and entrepreneurs. It allows users to automate repetitive business tasks using a drag-and-drop builder powered by n8n.
@@ -6,6 +7,7 @@ WorkflowAI is a full-stack workflow automation web application designed for Nige
 ## Features
 
 ### Frontend (React/Vanilla JS)
+
 - Landing page with business-focused copy
 - Login/Signup pages
 - Dashboard with active workflows and execution history
@@ -15,6 +17,7 @@ WorkflowAI is a full-stack workflow automation web application designed for Nige
 - Responsive design for all devices
 
 ### Backend (Python - FastAPI)
+
 - JWT Authentication
 - CRUD operations for workflows
 - Execution logs tracking
@@ -23,6 +26,7 @@ WorkflowAI is a full-stack workflow automation web application designed for Nige
 - Secure API endpoints
 
 ### Integrations
+
 - n8n hosted instance (iframe integration)
 - SQLite database
 - Paystack for subscriptions
@@ -41,13 +45,12 @@ WorkflowAI is a full-stack workflow automation web application designed for Nige
 ## Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/workflowai-app.git
    cd workflowai-app
 
 
    running backend
-   -- uvicorn main:app 
-
-   running frontend
-   -- python serve_frontend.py
+   -- uvicorn main:app
+   ```

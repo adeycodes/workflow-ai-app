@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // Store token in localStorage
-                    localStorage.setItem('access_token', data.access_token);
+                    // Token is now stored as HTTP-only cookie by backend
+                    // No need to store in localStorage
                     
                     alert.className = 'alert alert-success';
                     alert.innerHTML = '<i class="fas fa-check-circle"></i> Login successful! Redirecting...';
@@ -65,10 +65,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Google Login
-    document.getElementById('googleLoginBtn').addEventListener('click', function() {
-        // Redirect to Google OAuth endpoint
-        window.location.href = CONFIG.API_BASE_URL + '/auth/google/login';
-    });
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Google login button clicked');
+            
+            // Store the current URL to redirect back after login
+            sessionStorage.setItem('preAuthUrl', window.location.href);
+            
+            // Show loading state
+            const originalText = googleLoginBtn.innerHTML;
+            googleLoginBtn.disabled = true;
+            googleLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting...';
+            
+            console.log('Initiating Google OAuth flow to:', `${CONFIG.API_BASE_URL}/auth/google/login`);
+            
+            // Small delay to show the loading state
+            setTimeout(() => {
+                try {
+                    // Redirect to Google OAuth endpoint
+                    window.location.href = `${CONFIG.API_BASE_URL}/auth/google/login`;
+                } catch (error) {
+                    console.error('Error during Google OAuth redirect:', error);
+                    showAlert('Failed to initiate Google login. Please try again.', 'danger');
+                    googleLoginBtn.disabled = false;
+                    googleLoginBtn.innerHTML = originalText;
+                }
+            }, 300);
+        });
+    }
 
     // Microsoft Login (placeholder)
     document.getElementById('microsoftLoginBtn').addEventListener('click', function() {

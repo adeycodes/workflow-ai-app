@@ -1,16 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Check if user is logged in
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-        window.location.href = '/login.html';
-    }
+    // Authentication is now handled via cookies
+    // No need to check localStorage for token
     
     // Logout functionality
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            localStorage.removeItem('access_token');
+            // Remove access token from cookies
+            document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             window.location.href = '/login.html';
         });
     }
