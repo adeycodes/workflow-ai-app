@@ -190,12 +190,17 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 from config import ALLOWED_ORIGINS
 
 # CORS middleware with specific origins and headers
+print("Configuring CORS with allowed origins:", ALLOWED_ORIGINS)
+
+# Add middleware with enhanced CORS settings
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://workflow-ai-app(-\w+)?.vercel.app",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=[
+        "*",  # Allow all headers for now
         "Authorization",
         "Content-Type",
         "Accept",
@@ -206,7 +211,7 @@ app.add_middleware(
         "Access-Control-Allow-Credentials"
     ],
     expose_headers=["*"],
-    max_age=600,  # 10 minutes
+    max_age=86400,  # 24 hours
 )
 
 # Include routers

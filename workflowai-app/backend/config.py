@@ -32,6 +32,7 @@ ALGORITHM = "HS256"
 if IS_PRODUCTION:
     ALLOWED_ORIGINS = [
         "https://workflow-ai-app.vercel.app",
+        "https://workflow-ai-app-*.vercel.app",
         "https://*.vercel.app"
     ]
 else:
@@ -40,8 +41,15 @@ else:
         "http://127.0.0.1:8000",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "http://localhost"
+        "http://localhost",
+        "http://localhost:8080"
     ]
+
+# Add debug logging for CORS
+print(f"CORS Configuration - IS_PRODUCTION: {IS_PRODUCTION}")
+print(f"Allowed Origins: {ALLOWED_ORIGINS}")
+print(f"Base URL: {BASE_URL}")
+print(f"Google Redirect URI: {GOOGLE_REDIRECT_URI}")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # n8n
