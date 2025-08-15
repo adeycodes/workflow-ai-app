@@ -2,6 +2,7 @@ services:
   - type: web
     name: workflow-ai-backend
     env: python
+    rootDirectory: work-flow-ai/workflow-ai
     buildCommand: pip install -r backend/requirements.txt
     startCommand: gunicorn backend.main:app --worker-class uvicorn.workers.UvicornWorker
     envVars:
