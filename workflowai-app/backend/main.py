@@ -10,7 +10,7 @@ import requests
 from sqlalchemy.orm import Session
 from typing import List
 import uvicorn
-from database import engine, Base, get_db
+from .database import engine, Base, get_db
 from models import User, Workflow, ExecutionLog, Template
 from auth import (
     authenticate_user, 
